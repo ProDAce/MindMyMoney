@@ -7,7 +7,7 @@ export const createGlobalStyles = (theme: Theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      paddingTop: 60,
+      paddingTop: 0,
       paddingHorizontal: spacing.md, // 20 → use spacing.md (16) or spacing.lg (24) if you want exact 20, hardcode it
     },
     title: {
@@ -21,13 +21,6 @@ export const createGlobalStyles = (theme: Theme) =>
       borderWidth: 1,
       borderRadius: 8,
       borderColor: theme.colors.border
-    },
-    addButton: {
-      top: -20,
-      width: 64,
-      height: 64,
-      justifyContent: 'center',
-      alignItems: 'center',
     },
   });
 
