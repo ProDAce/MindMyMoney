@@ -1,11 +1,12 @@
+import Header from "@/components/ui/header";
 import { useGlobalStyles } from "@/styles/global";
-import { ScrollView, Text } from "react-native";
+import { ScrollView } from "react-native";
 
 export default function Budgets() {
-    const {theme, styles} = useGlobalStyles();
+    const { theme, styles } = useGlobalStyles();
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>Budget Page</Text>
+            <Header showButton="menu" title="Budget" />
         </ScrollView>
     );
 }

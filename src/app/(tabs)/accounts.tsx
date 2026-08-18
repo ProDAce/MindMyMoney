@@ -1,11 +1,12 @@
+import Header from "@/components/ui/header";
 import { useGlobalStyles } from "@/styles/global";
-import { ScrollView, Text } from "react-native";
+import { ScrollView } from "react-native";
 
 export default function Accounts() {
     const {theme, styles} = useGlobalStyles();
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>Accounts Page</Text>
+            <Header showButton="menu" title="Account"/>
         </ScrollView>
     );
 }

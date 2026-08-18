@@ -39,6 +39,14 @@ const palette = {
   errorLight: '#D9534F',
   errorDark: '#E8837F',
 
+  // Transaction colours
+  creditLight: '#5FAE7A',
+  creditDark: '#8FD1A6',
+  debitLight: '#D9534F',
+  debitDark: '#E8837F',
+  transferLight: '#4A90D4',
+  transferDark: '#7AB3E8',
+
   // Static
   white: '#FFFFFF',
   black: '#000000',
@@ -65,6 +73,10 @@ export interface ThemeColors {
   success: string;
   warning: string;
   error: string;
+
+  credit: string;
+  debit: string;
+  transfer: string;
 
   disabled: string;
   overlay: string;
@@ -95,6 +107,10 @@ export const lightTheme: Theme = {
     warning: palette.warningLight,
     error: palette.errorLight,
 
+    credit: palette.creditLight,
+    debit: palette.debitLight,
+    transfer: palette.transferLight,
+
     disabled: '#D8D5DE',
     overlay: 'rgba(61, 58, 69, 0.4)',
     transparent: palette.transparent,
@@ -119,6 +135,10 @@ export const darkTheme: Theme = {
     success: palette.successDark,
     warning: palette.warningDark,
     error: palette.errorDark,
+
+    credit: palette.creditDark,
+    debit: palette.debitDark,
+    transfer: palette.transferDark,
 
     disabled: '#3D3850',
     overlay: 'rgba(0, 0, 0, 0.6)',

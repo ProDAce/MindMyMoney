@@ -9,7 +9,7 @@ export default function RootLayout() {
   
   return (
     <ThemeProvider>
-      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={styles.body} edges={['top', 'left', 'right']}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen

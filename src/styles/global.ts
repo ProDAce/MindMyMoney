@@ -1,14 +1,21 @@
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { spacing, Theme, useTheme } from './theme';
+import { Theme, useTheme } from './theme';
 
 export const createGlobalStyles = (theme: Theme) =>
   StyleSheet.create({
+    body: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      padding: 0,
+      margin: 0,
+    },
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      paddingTop: 0,
-      paddingHorizontal: spacing.md, // 20 → use spacing.md (16) or spacing.lg (24) if you want exact 20, hardcode it
+      padding: 8,
+      margin: 0,
+      // paddingHorizontal: spacing.md, // 20 → use spacing.md (16) or spacing.lg (24) if you want exact 20, hardcode it
     },
     title: {
       fontSize: 28,

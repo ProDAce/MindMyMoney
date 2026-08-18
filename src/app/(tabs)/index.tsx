@@ -1,3 +1,4 @@
+import Header from "@/components/ui/header";
 import { useGlobalStyles } from "@/styles/global";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,7 +19,7 @@ export default function Dashboard() {
     };
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Dashboard page</Text>
+            <Header showButton="menu" title=""/>
             <ScrollView
                 // style={styles.container}
                 // contentContainerStyle={{
