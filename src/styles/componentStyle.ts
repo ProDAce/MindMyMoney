@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { Theme, radius, spacing, typography, useTheme } from './theme';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 // ---------------------------------------------------------------------------
 // Header
@@ -52,6 +54,193 @@ const createHeaderStyles = (theme: Theme) =>
 export const useHeaderStyles = () => {
   const theme = useTheme();
   return useMemo(() => createHeaderStyles(theme), [theme]);
+};
+
+// ---------------------------------------------------------------------------
+// Transaction type buttons (segmented control)
+// ---------------------------------------------------------------------------
+
+const createTransactionTypeSelectorStyle = (theme: Theme) =>
+  StyleSheet.create({
+    segmentContainer: {
+      flexDirection: 'row',
+      // borderRadius: radius.md,
+      // borderWidth: 1,
+      // borderColor: theme.colors.border,
+      overflow: 'hidden', // clips children to the rounded outer corners
+    },
+    segment: {
+      margin: 8,
+      flex: 1, // all three divide the row width evenly
+      flexDirection: 'row', // icon + label side by side
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.xs,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      borderRadius: 20,
+      backgroundColor: theme.colors.surface,
+    },
+    // segmentSelected: {
+    //   backgroundColor: theme.colors.primary,
+    // },
+    segmentBorder: {
+      borderRightWidth: 1,
+      borderRightColor: theme.colors.border,
+    },
+    segmentText: {
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.text,
+    },
+    segmentTextSelected: {
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.primaryText,
+    },
+  });
+
+export const useTransactionTypeSelectorStyle = () => {
+  const theme = useTheme();
+  return useMemo(() => createTransactionTypeSelectorStyle(theme), [theme]);
+};
+
+// ---------------------------------------------------------------------------
+// Amount Input Field
+// ---------------------------------------------------------------------------
+
+const createAmountInputStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: radius.md,
+      backgroundColor: theme.colors.surface,
+      paddingHorizontal: spacing.sm,
+      height: 56,
+    },
+    currencyButton: {
+      display: 'flex',
+      flexDirection: 'row',
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRightWidth: 1,
+      borderRightColor: theme.colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    currencySymbol: {
+      marginHorizontal: spacing.xs,
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.primary,
+    },
+    amountInput: {
+      flex: 1,
+      fontSize: typography.size.xl,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.text,
+      paddingHorizontal: spacing.sm,
+    },
+    calculatorButton: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderLeftWidth: 1,
+      borderLeftColor: theme.colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  });
+
+export const useAmountInputStyles = () => {
+  const theme = useTheme();
+  return useMemo(() => createAmountInputStyles(theme), [theme]);
+};
+
+// ---------------------------------------------------------------------------
+// Bottom Sheet
+// ---------------------------------------------------------------------------
+
+const createBottomSheetStyles = (theme: Theme) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: theme.colors.overlay,
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      flexDirection: 'column',
+      minHeight: Math.max(SCREEN_HEIGHT * 0.6 || 480), // real pixel bound, not '%', so children can compute flex height
+      backgroundColor: theme.colors.surface,
+      borderTopLeftRadius: radius.lg,
+      borderTopRightRadius: radius.lg,
+      paddingTop: spacing.sm,
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.xl,
+      overflow: 'hidden',
+    },
+    handle: {
+      alignSelf: 'center',
+      width: 40,
+      height: 4,
+      borderRadius: radius.full,
+      backgroundColor: theme.colors.border,
+      marginBottom: spacing.md,
+    },
+    // Wraps sheet content below the handle — flex:1 so it fills remaining
+    // space within the bounded sheet height, letting scrollable children
+    // (FlatList, ScrollView) size correctly instead of being clipped.
+    content: {
+      flexShrink: 1,
+    },
+  });
+
+export const useBottomSheetStyles = () => {
+  const theme = useTheme();
+  return useMemo(() => createBottomSheetStyles(theme), [theme]);
+};
+
+const createCurrencyPickerStyles = (theme: Theme) =>
+  StyleSheet.create({
+    title: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text,
+      marginBottom: spacing.md,
+    },
+    flatlist: {
+      margin: 0,
+      padding: 0,
+      backgroundColor: '#00ff00'
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    rowSelected: {
+      backgroundColor: theme.colors.surfaceElevated,
+      borderRadius: radius.sm,
+    },
+    symbol: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.primary,
+      width: 36,
+    },
+    code: {
+      fontSize: typography.size.md,
+      color: theme.colors.text,
+    },
+  });
+
+export const useCurrencyPickerStyles = () => {
+  const theme = useTheme();
+  return useMemo(() => createCurrencyPickerStyles(theme), [theme]);
 };
 
 // ---------------------------------------------------------------------------

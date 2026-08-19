@@ -41,11 +41,11 @@ const palette = {
 
   // Transaction colours
   creditLight: '#5FAE7A',
-  creditDark: '#8FD1A6',
+  creditDark: '#6fda94',
   debitLight: '#D9534F',
-  debitDark: '#E8837F',
+  debitDark: '#f2605b',
   transferLight: '#4A90D4',
-  transferDark: '#7AB3E8',
+  transferDark: '#65b3fb',
 
   // Static
   white: '#FFFFFF',

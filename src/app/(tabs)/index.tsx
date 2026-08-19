@@ -1,10 +1,14 @@
 import Header from "@/components/ui/header";
 import { useGlobalStyles } from "@/styles/global";
+import Constants from 'expo-constants';
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+
 export default function Dashboard() {
     const { theme, styles } = useGlobalStyles();
+    const appName = Constants.expoConfig?.name;
+
     const insets = useSafeAreaInsets();
     const renderTest = () => {
         return (
@@ -19,12 +23,12 @@ export default function Dashboard() {
     };
     return (
         <View style={styles.container}>
-            <Header showButton="menu" title=""/>
+            <Header showButton="menu" title={appName} />
             <ScrollView
-                // style={styles.container}
-                // contentContainerStyle={{
-                //     paddingBottom: insets.bottom + 40,
-                // }}
+            // style={styles.container}
+            // contentContainerStyle={{
+            //     paddingBottom: insets.bottom + 40,
+            // }}
             >
 
                 {renderTest()}
