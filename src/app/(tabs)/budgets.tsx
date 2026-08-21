@@ -3,9 +3,9 @@ import { useGlobalStyles } from "@/styles/global";
 import { ScrollView } from "react-native";
 
 export default function Budgets() {
-    const { theme, styles } = useGlobalStyles();
+    const { theme, globalStyles } = useGlobalStyles();
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={globalStyles.container}>
             <Header showButton="menu" title="Budget" />
         </ScrollView>
     );

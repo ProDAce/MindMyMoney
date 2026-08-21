@@ -35,8 +35,8 @@ export const createGlobalStyles = (theme: Theme) =>
 // Memoized so styles only recompute when the theme (light/dark) actually changes.
 export const useGlobalStyles = () => {
   const theme = useTheme();
-  const styles = useMemo(() => createGlobalStyles(theme), [theme]);
-  return { theme, styles };
+  const globalStyles = useMemo(() => createGlobalStyles(theme), [theme]);
+  return { theme, globalStyles };
 };
 
 // ---------------------------------------------------------------------------

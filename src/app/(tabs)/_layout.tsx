@@ -6,7 +6,7 @@ import { PlatformPressable } from "expo-router/build/react-navigation";
 import { StyleSheet, View } from "react-native";
 
 export default function TabLayout() {
-  const { theme, styles } = useGlobalStyles();
+  const { theme } = useGlobalStyles();
   const router = useRouter();
   return (
     <Tabs

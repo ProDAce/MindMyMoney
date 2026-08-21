@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 
 export default function Dashboard() {
-    const { theme, styles } = useGlobalStyles();
+    const { theme, globalStyles } = useGlobalStyles();
     const appName = Constants.expoConfig?.name;
 
     const insets = useSafeAreaInsets();
@@ -14,7 +14,7 @@ export default function Dashboard() {
         return (
             <>
                 {Array.from({ length: 10 }, (_, index) => (
-                    <View key={index} style={styles.card}>
+                    <View key={index} style={globalStyles.card}>
                         <Text style={{ color: theme.colors.text }}>Card {index + 1}</Text>
                     </View>
                 ))}
@@ -22,7 +22,7 @@ export default function Dashboard() {
         );
     };
     return (
-        <View style={styles.container}>
+        <View style={globalStyles.container}>
             <Header showButton="menu" title={appName} />
             <ScrollView
             // style={styles.container}

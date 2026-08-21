@@ -24,7 +24,7 @@ export default function Header({
     onLeftPress,
     rightActions = [],
 }: HeaderProps) {
-    const { theme, styles } = useGlobalStyles();
+    const { theme, globalStyles } = useGlobalStyles();
     const headerStyles = useHeaderStyles();
     const router = useRouter();
 

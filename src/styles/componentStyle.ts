@@ -11,6 +11,7 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 const createHeaderStyles = (theme: Theme) =>
   StyleSheet.create({
     headerContainer: {
+      position: 'sticky',
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -152,6 +153,16 @@ const createAmountInputStyles = (theme: Theme) =>
       justifyContent: 'center',
       alignItems: 'center',
     },
+    trasparentContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      // borderWidth: 1,
+      // borderColor: theme.colors.border,
+      // borderRadius: radius.md,
+      // backgroundColor: theme.colors.surface,
+      paddingHorizontal: spacing.sm,
+      height: 56,
+    }
   });
 
 export const useAmountInputStyles = () => {
@@ -172,8 +183,8 @@ const createBottomSheetStyles = (theme: Theme) =>
     },
     sheet: {
       flexDirection: 'column',
-      minHeight: Math.max(SCREEN_HEIGHT * 0.6 || 480), // real pixel bound, not '%', so children can compute flex height
-      backgroundColor: theme.colors.surface,
+      maxHeight: Math.max(SCREEN_HEIGHT * 0.6,  600), // real pixel bound, not '%', so children can compute flex height
+      backgroundColor: theme.colors.background,
       borderTopLeftRadius: radius.lg,
       borderTopRightRadius: radius.lg,
       paddingTop: spacing.sm,
@@ -241,6 +252,34 @@ const createCurrencyPickerStyles = (theme: Theme) =>
 export const useCurrencyPickerStyles = () => {
   const theme = useTheme();
   return useMemo(() => createCurrencyPickerStyles(theme), [theme]);
+};
+
+const createMainButtonStyle = (theme: Theme) =>
+  StyleSheet.create({
+    mainButton: {
+      flex: 1,
+      height: 48,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    mainButtonTextBasic: {
+      color: theme.colors.text, 
+      fontSize: 16, 
+      fontWeight: '600'
+    },
+    mainButtonTextHighlight: {
+      color: theme.colors.accentText, 
+      fontSize: 16, 
+      fontWeight: '600'
+    },
+  });
+
+export const useMainButtonStyle = () => {
+  const theme = useTheme();
+  return useMemo(() => createMainButtonStyle(theme), [theme]);
 };
 
 // ---------------------------------------------------------------------------

@@ -5,11 +5,11 @@ import { Stack } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RootLayout() {
-    const { theme, styles } = useGlobalStyles();
+    const { theme, globalStyles } = useGlobalStyles();
   
   return (
     <ThemeProvider>
-      <SafeAreaView style={styles.body} edges={['top', 'left', 'right', 'bottom']}>
+      <SafeAreaView style={globalStyles.body} edges={['top', 'left', 'right']}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
