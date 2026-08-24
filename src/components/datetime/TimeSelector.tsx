@@ -1,32 +1,12 @@
 // components/datetime/TimeSelector.tsx
-
-import { useEffect, useRef, useState } from 'react';
-import {
-    GestureResponderEvent,
-    LayoutChangeEvent,
-    PanResponder,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-// import { COLORS } from './Calender';
-
-export const COLORS = {
-  ink: '#14161A',
-  panel: '#1B1E24',
-  field: '#21242B',
-  border: '#2E323B',
-  text: '#F5F3EE',
-  muted: '#8A8F98',
-  placeholder: '#575B64',
-  accent: '#35D0A0',
-  today: '#FF8A3D',
-};
+import { useEffect, useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import Clock, { HourFormat } from './Clock';
+import { useTimeSelectorStyle } from './dateTimeStyles';
 
 // ---------------------------------------------------------------------------
-// Time value contract: UI works in 12-hour + AM/PM, but everything that
-// leaves this component — onChange, the value it's fed back — is always
+// Time value contract: the UI can work in 12-hour + AM/PM, but everything
+// that leaves this component — onChange, the isoTime string — is always
 // 24-hour. AM/PM never escapes this file.
 // ---------------------------------------------------------------------------
 
@@ -39,7 +19,10 @@ export interface TimeValue {
 
 export interface TimeSelectorProps {
   value?: TimeValue;
-  onChange: (time: TimeValue) => void;
+  /** Display/interaction format for the dial. Storage is always 24h regardless. */
+  format?: HourFormat;
+  /** (time, isoTime) — isoTime is always the canonical zero-padded "HH:MM", 24h. */
+  onChange: (time: TimeValue, isoTime: string) => void;
 }
 
 type Period = 'AM' | 'PM';
@@ -61,100 +44,55 @@ function to12Hour(hour24: number): { hour12: number; period: Period } {
   return { hour12, period };
 }
 
+/** Canonical storage string — always 24h, zero-padded, no AM/PM. */
+export function toTimeStorageString(time: TimeValue): string {
+  return `${pad2(time.hour)}:${pad2(time.minute)}`;
+}
+
+/** Display string honoring the chosen format — for showing on a trigger, not for storage. */
+export function formatTime(time: TimeValue, format: HourFormat): string {
+  if (format === '24h') return `${pad2(time.hour)}:${pad2(time.minute)}`;
+  const { hour12, period } = to12Hour(time.hour);
+  return `${pad2(hour12)}:${pad2(time.minute)} ${period}`;
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-const FACE_SIZE = 240;
-const RADIUS = FACE_SIZE / 2;
-const LABEL_INSET = 30; // distance of number labels from the outer edge
+export default function TimeSelector({ value, format = '12h', onChange }: TimeSelectorProps) {
+  const styles = useTimeSelectorStyle();
 
-export default function TimeSelector({ value, onChange }: TimeSelectorProps) {
-  const initial = value ? to12Hour(value.hour) : to12Hour(new Date().getHours());
-
-  const [hour12, setHour12] = useState(initial.hour12);
+  const [hour24, setHour24] = useState(value?.hour ?? new Date().getHours());
   const [minute, setMinute] = useState(value?.minute ?? 0);
-  const [period, setPeriod] = useState<Period>(initial.period);
   const [mode, setMode] = useState<Mode>('hour');
 
-  // Report 24-hour time any time the underlying pieces change — the
-  // consumer never sees hour12 or period.
+  const { hour12, period } = to12Hour(hour24);
+
+  // Always report 24-hour time — the consumer never sees hour12/period.
   useEffect(() => {
-    onChange({ hour: to24Hour(hour12, period), minute });
+    const time: TimeValue = { hour: hour24, minute };
+    onChange(time, toTimeStorageString(time));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hour12, minute, period]);
+  }, [hour24, minute]);
 
-  const faceLayout = useRef({ x: 0, y: 0, width: FACE_SIZE, height: FACE_SIZE });
-
-  const onFaceLayout = (e: LayoutChangeEvent) => {
-    const { x, y, width, height } = e.nativeEvent.layout;
-    faceLayout.current = { x, y, width, height };
-  };
-
-  const angleFromTouch = (evt: GestureResponderEvent): number => {
-    const { locationX, locationY } = evt.nativeEvent;
-    const cx = faceLayout.current.width / 2;
-    const cy = faceLayout.current.height / 2;
-    const dx = locationX - cx;
-    const dy = locationY - cy;
-    let deg = (Math.atan2(dx, -dy) * 180) / Math.PI; // 0deg = 12 o'clock, clockwise
-    if (deg < 0) deg += 360;
-    return deg;
-  };
-
-  const applyTouch = (evt: GestureResponderEvent) => {
-    const deg = angleFromTouch(evt);
-    if (mode === 'hour') {
-      const idx = Math.round(deg / 30) % 12;
-      setHour12(idx === 0 ? 12 : idx);
+  const handleSelectHour = (dialValue: number) => {
+    if (format === '24h') {
+      setHour24(dialValue); // Clock already reports the actual 0–23 hour in 24h mode
     } else {
-      const m = Math.round(deg / 6) % 60;
-      setMinute(m);
+      setHour24(to24Hour(dialValue, period)); // dialValue is 1–12; keep current AM/PM
     }
   };
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: applyTouch,
-      onPanResponderMove: applyTouch,
-      onPanResponderRelease: () => {
-        if (mode === 'hour') setMode('minute'); // native-picker-style auto-advance
-      },
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  ).current;
+  const handleSelectMinute = (m: number) => setMinute(m);
 
-  // --- label geometry -------------------------------------------------
-
-  const labelPosition = (index: number) => {
-    const theta = (index * 30 * Math.PI) / 180;
-    const r = RADIUS - LABEL_INSET;
-    const x = RADIUS + r * Math.sin(theta);
-    const y = RADIUS - r * Math.cos(theta);
-    return { left: x - 16, top: y - 12 };
+  const handleTogglePeriod = (p: Period) => {
+    setHour24(to24Hour(hour12, p));
   };
 
-  const hourLabels = Array.from({ length: 12 }, (_, i) => (i === 0 ? 12 : i));
-  const minuteLabels = Array.from({ length: 12 }, (_, i) => i * 5);
-  const labels = mode === 'hour' ? hourLabels : minuteLabels;
-
-  const isLabelActive = (labelValue: number) =>
-    mode === 'hour' ? labelValue === hour12 : labelValue === minute;
-
-  // --- hand geometry ----------------------------------------------------
-
-  const handAngleDeg = mode === 'hour' ? (hour12 % 12) * 30 : minute * 6;
-  const handCssRotation = handAngleDeg - 90; // 0deg in CSS-rotate points right (3 o'clock)
-  const handLength = RADIUS - LABEL_INSET;
-
-  const handEnd = (() => {
-    const theta = (handAngleDeg * Math.PI) / 180;
-    const x = RADIUS + handLength * Math.sin(theta);
-    const y = RADIUS - handLength * Math.cos(theta);
-    return { x, y };
-  })();
+  const handleRelease = () => {
+    if (mode === 'hour') setMode('minute'); // native-picker-style auto-advance
+  };
 
   return (
     <View style={styles.container}>
@@ -162,7 +100,7 @@ export default function TimeSelector({ value, onChange }: TimeSelectorProps) {
         <View style={styles.digitalRow}>
           <TouchableOpacity onPress={() => setMode('hour')}>
             <Text style={[styles.digitalText, mode === 'hour' && styles.digitalTextActive]}>
-              {pad2(hour12)}
+              {pad2(format === '24h' ? hour24 : hour12)}
             </Text>
           </TouchableOpacity>
           <Text style={styles.digitalColon}>:</Text>
@@ -173,170 +111,40 @@ export default function TimeSelector({ value, onChange }: TimeSelectorProps) {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.periodColumn}>
-          <TouchableOpacity
-            style={[styles.periodButton, period === 'AM' && styles.periodButtonActive]}
-            onPress={() => setPeriod('AM')}
-          >
-            <Text style={[styles.periodText, period === 'AM' && styles.periodTextActive]}>
-              AM
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.periodButton, period === 'PM' && styles.periodButtonActive]}
-            onPress={() => setPeriod('PM')}
-          >
-            <Text style={[styles.periodText, period === 'PM' && styles.periodTextActive]}>
-              PM
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {format === '12h' && (
+          <View style={styles.periodColumn}>
+            <TouchableOpacity
+              style={[styles.periodButton, period === 'AM' && styles.periodButtonActive]}
+              onPress={() => handleTogglePeriod('AM')}
+            >
+              <Text style={[styles.periodText, period === 'AM' && styles.periodTextActive]}>
+                AM
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.periodButton, period === 'PM' && styles.periodButtonActive]}
+              onPress={() => handleTogglePeriod('PM')}
+            >
+              <Text style={[styles.periodText, period === 'PM' && styles.periodTextActive]}>
+                PM
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <View style={styles.faceWrap}>
-        <View style={styles.face} onLayout={onFaceLayout} {...panResponder.panHandlers}>
-          <View style={styles.centerDot} />
-
-          <View
-            style={[
-              styles.hand,
-              {
-                width: handLength,
-                transform: [{ rotate: `${handCssRotation}deg` }],
-              },
-            ]}
-          />
-          <View style={[styles.handEndDot, { left: handEnd.x - 16, top: handEnd.y - 16 }]} />
-
-          {labels.map((labelValue, i) => {
-            const pos = labelPosition(i);
-            const active = isLabelActive(labelValue);
-            return (
-              <View key={i} pointerEvents="none" style={[styles.labelBox, pos]}>
-                <Text style={[styles.labelText, active && styles.labelTextActive]}>
-                  {mode === 'minute' ? pad2(labelValue) : labelValue}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
+        <Clock
+          mode={mode}
+          hourFormat={format}
+          hour12={hour12}
+          hour24={hour24}
+          minute={minute}
+          onSelectHour={handleSelectHour}
+          onSelectMinute={handleSelectMinute}
+          onRelease={handleRelease}
+        />
       </View>
     </View>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLORS.panel,
-    borderRadius: 16,
-    padding: 16,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 18,
-  },
-  digitalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  digitalText: {
-    color: COLORS.muted,
-    fontSize: 40,
-    fontWeight: '300',
-  },
-  digitalTextActive: {
-    color: COLORS.accent,
-    fontWeight: '600',
-  },
-  digitalColon: {
-    color: COLORS.muted,
-    fontSize: 40,
-    fontWeight: '300',
-    marginHorizontal: 2,
-  },
-  periodColumn: {
-    marginLeft: 16,
-  },
-  periodButton: {
-    width: 44,
-    height: 28,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 2,
-  },
-  periodButtonActive: {
-    backgroundColor: COLORS.accent,
-    borderColor: COLORS.accent,
-  },
-  periodText: {
-    color: COLORS.muted,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  periodTextActive: {
-    color: COLORS.ink,
-  },
-  faceWrap: {
-    alignItems: 'center',
-  },
-  face: {
-    width: FACE_SIZE,
-    height: FACE_SIZE,
-    borderRadius: FACE_SIZE / 2,
-    backgroundColor: COLORS.field,
-  },
-  centerDot: {
-    position: 'absolute',
-    left: RADIUS - 4,
-    top: RADIUS - 4,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.accent,
-    zIndex: 3,
-  },
-  hand: {
-    position: 'absolute',
-    left: RADIUS,
-    top: RADIUS - 1,
-    height: 2,
-    backgroundColor: COLORS.accent,
-    transformOrigin: 'left',
-    zIndex: 1,
-  },
-  handEndDot: {
-    position: 'absolute',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.accent,
-    opacity: 0.25,
-    zIndex: 1,
-  },
-  labelBox: {
-    position: 'absolute',
-    width: 32,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
-  },
-  labelText: {
-    color: COLORS.text,
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  labelTextActive: {
-    color: COLORS.ink,
-    fontWeight: '700',
-  },
-});

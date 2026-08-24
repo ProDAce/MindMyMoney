@@ -1,6 +1,6 @@
 // components/datetime/DateSelector.tsx
 import { useGlobalStyles } from '@/styles/global';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -75,6 +75,14 @@ export function formatDate(date: Date, tokens: TokenType[], seps: string[]): str
 
 function stripTime(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+/** Canonical storage string — always "yyyy-mm-dd", local components, no UTC conversion. */
+export function toISODateString(date: Date): string {
+  const y = date.getFullYear();
+  const m = pad2(date.getMonth() + 1);
+  const d = pad2(date.getDate());
+  return `${y}-${m}-${d}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -178,17 +186,23 @@ export default function DateSelector({
     if (digits.length === maxLen) focusNext(index);
   };
 
-  const applyDate = (date: Date) => {
-    setDayStr(pad2(date.getDate()));
-    if (tokens.includes('MonthName')) {
-      setMonthIndex(date.getMonth());
-    } else {
-      setMonthStr(pad2(date.getMonth() + 1));
-    }
-    setYearStr(
-      yearTokenLen === 4 ? `${date.getFullYear()}` : `${date.getFullYear()}`.slice(-2)
-    );
-  };
+  // Stable reference: Calendar is memoized and compares onSelect by
+  // identity, so this must not be recreated every render (e.g. on every
+  // keystroke in the segment fields) or the memoization is defeated.
+  const applyDate = useCallback(
+    (date: Date) => {
+      setDayStr(pad2(date.getDate()));
+      if (tokens.includes('MonthName')) {
+        setMonthIndex(date.getMonth());
+      } else {
+        setMonthStr(pad2(date.getMonth() + 1));
+      }
+      setYearStr(
+        yearTokenLen === 4 ? `${date.getFullYear()}` : `${date.getFullYear()}`.slice(-2)
+      );
+    },
+    [tokens, yearTokenLen]
+  );
 
   const selectMonthName = (idx: number) => {
     setMonthIndex(idx);
@@ -196,7 +210,7 @@ export default function DateSelector({
     focusNext(tokens.indexOf('MonthName'));
   };
 
-  const {theme} = useGlobalStyles();
+  const { theme } = useGlobalStyles();
 
   const styles = StyleSheet.create({
     container: {
