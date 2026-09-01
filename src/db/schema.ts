@@ -49,6 +49,7 @@ export const transactions = sqliteTable("transactions", {
 export const categories = sqliteTable("categories", {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
+    type: text("type", { enum: ["credit", "debit"] }).notNull(),
     colorBg: text("color_bg").notNull(),
     colorIcon: text("color_icon").notNull(),
     icon: blob("icon", { mode: "buffer" }).notNull(),
